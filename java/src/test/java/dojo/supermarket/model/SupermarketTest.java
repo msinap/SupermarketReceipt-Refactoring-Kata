@@ -16,7 +16,7 @@ public class SupermarketTest {
 
     @BeforeEach
     public void setUp() {
-        catalog = new FakeCatalog();
+        catalog = new Catalog();
         teller = new Teller(catalog);
         theCart = new ShoppingCart();
 
