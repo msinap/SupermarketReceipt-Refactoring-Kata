@@ -3,7 +3,7 @@ package dojo.supermarket.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Catalog implements SupermarketCatalog {
+public class FakeCatalog implements SupermarketCatalog {
     private final Map<String, Product> products = new HashMap<>();
     private final Map<String, Double> prices = new HashMap<>();
 
