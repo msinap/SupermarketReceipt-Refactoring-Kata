@@ -32,49 +32,51 @@ public class ShoppingCart {
         }
     }
 
+    private int getXFor(SpecialOfferType specialOfferType) {
+        switch (specialOfferType) {
+            case ThreeForTwo:   return 3;
+            case TwoForAmount:  return 2;
+            case FiveForAmount: return 5;
+            default:            return 1;
+        }
+    }
+
+    private Discount calculateDiscountXForAmount(int x, Product p, double quantity, double unitPrice, double argument) {
+        int quantityAsInt = (int) quantity;
+        if (quantityAsInt < x)
+            return null;
+        int intDivision = quantityAsInt / x;
+        double pricePerUnit = argument * intDivision;
+        double theTotal = (quantityAsInt % x) * unitPrice;
+        double total = pricePerUnit + theTotal;
+        double discountN = unitPrice * quantity - total;
+        return new Discount(p, x + " for " + argument, -discountN);
+    }
+
     void handleOffers(Receipt receipt, Map<Product, Offer> offers, SupermarketCatalog catalog) {
         for (Product p : productQuantities().keySet()) {
+            if (!offers.containsKey(p))
+                continue;
+            Offer offer = offers.get(p);
+            double unitPrice = catalog.getUnitPrice(p);
             double quantity = productQuantities.get(p);
-            if (offers.containsKey(p)) {
-                Offer offer = offers.get(p);
-                double unitPrice = catalog.getUnitPrice(p);
-                int quantityAsInt = (int) quantity;
-                Discount discount = null;
-                int x = 1;
-                if (offer.offerType == SpecialOfferType.ThreeForTwo) {
-                    x = 3;
-
-                } else if (offer.offerType == SpecialOfferType.TwoForAmount) {
-                    x = 2;
-                    if (quantityAsInt >= 2) {
-                        int intDivision = quantityAsInt / x;
-                        double pricePerUnit = offer.argument * intDivision;
-                        double theTotal = (quantityAsInt % 2) * unitPrice;
-                        double total = pricePerUnit + theTotal;
-                        double discountN = unitPrice * quantity - total;
-                        discount = new Discount(p, "2 for " + offer.argument, -discountN);
-                    }
-
-                }
-                if (offer.offerType == SpecialOfferType.FiveForAmount) {
-                    x = 5;
-                }
+            int quantityAsInt = (int) quantity;
+            Discount discount = null;
+            int x = getXFor(offer.offerType);
+            if (offer.offerType == SpecialOfferType.TwoForAmount || offer.offerType == SpecialOfferType.FiveForAmount) {
+                discount = calculateDiscountXForAmount(x, p, quantity, unitPrice, offer.argument);
+            }
+            else if (offer.offerType == SpecialOfferType.ThreeForTwo && quantityAsInt > 2) {
                 int numberOfXs = quantityAsInt / x;
-                if (offer.offerType == SpecialOfferType.ThreeForTwo && quantityAsInt > 2) {
-                    double discountAmount = quantity * unitPrice - ((numberOfXs * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
-                    discount = new Discount(p, "3 for 2", -discountAmount);
-                }
-                if (offer.offerType == SpecialOfferType.TenPercentDiscount) {
-                    discount = new Discount(p, offer.argument + "% off", -quantity * unitPrice * offer.argument / 100.0);
-                }
-                if (offer.offerType == SpecialOfferType.FiveForAmount && quantityAsInt >= 5) {
-                    double discountTotal = unitPrice * quantity - (offer.argument * numberOfXs + quantityAsInt % 5 * unitPrice);
-                    discount = new Discount(p, x + " for " + offer.argument, -discountTotal);
-                }
-                if (discount != null)
-                    receipt.addDiscount(discount);
+                double discountAmount = quantity * unitPrice - ((numberOfXs * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
+                discount = new Discount(p, "3 for 2", -discountAmount);
+            }
+            else if (offer.offerType == SpecialOfferType.TenPercentDiscount) {
+                discount = new Discount(p, offer.argument + "% off", -quantity * unitPrice * offer.argument / 100.0);
             }
 
+            if (discount != null)
+                receipt.addDiscount(discount);
         }
     }
 }
