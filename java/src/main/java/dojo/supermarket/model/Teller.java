@@ -1,20 +1,21 @@
 package dojo.supermarket.model;
 
-import java.util.HashMap;
+import dojo.supermarket.model.offer.OfferRepository;
+import dojo.supermarket.model.offer.SpecialOfferType;
+
 import java.util.List;
-import java.util.Map;
 
 public class Teller {
 
     private final SupermarketCatalog catalog;
-    private final Map<Product, Offer> offers = new HashMap<>();
+    private final OfferRepository offerRepository = OfferRepository.getInstance();
 
     public Teller(SupermarketCatalog catalog) {
         this.catalog = catalog;
     }
 
     public void addSpecialOffer(SpecialOfferType offerType, Product product, double argument) {
-        this.offers.put(product, new Offer(offerType, product, argument));
+        offerRepository.addOffer(offerType, product, argument);
     }
 
     public Receipt checksOutArticlesFrom(ShoppingCart theCart) {
@@ -27,7 +28,7 @@ public class Teller {
             double price = quantity * unitPrice;
             receipt.addProduct(p, quantity, unitPrice, price);
         }
-        theCart.handleOffers(receipt, this.offers, this.catalog);
+        theCart.handleOffers(receipt, this.catalog);
 
         return receipt;
     }
