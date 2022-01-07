@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 
 public class ReceiptPrinterTest {
 
-    Product toothbrush = new Product("toothbrush", ProductUnit.Each);
-    Product apples = new Product("apples", ProductUnit.Kilo);
-    Receipt receipt = new Receipt();
+    final Product toothbrush = new Product("toothbrush", ProductUnit.Each);
+    final Product apples = new Product("apples", ProductUnit.Kilo);
+    final Receipt receipt = new Receipt();
 
     @Test
     public void oneLineItem() {
